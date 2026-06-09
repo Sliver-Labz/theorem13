@@ -1,0 +1,6 @@
+[smr]
+enabled = true
+max_reconfigs_per_slot = 3
+failure_detection_threshold_ms = 5000
+intactness_proof_timeout_ms = 2000
+checkpoint_ballot_height = 0
