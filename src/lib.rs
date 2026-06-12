@@ -6,6 +6,8 @@ pub mod coordinator;
 pub mod config;
 pub mod network;
 pub mod p2p;
+pub mod validation;
+pub mod byzantine;
 
 pub use protocol::{SMRState, ReconfigMessage, CheckpointBallot};
 pub use intactness::{IntactnessProof, IntactnessValidator};
@@ -15,3 +17,5 @@ pub use coordinator::ReconfigCoordinator;
 pub use config::{SMRConfig, ConfigBuilder, ConfigLoader};
 pub use network::{NetworkMessage, MessageType, MessageQueue, MessageSerializer};
 pub use p2p::P2PNode;
+pub use validation::{MessageValidator, SignatureValidator};
+pub use byzantine::ByzantineMessageFilter;
