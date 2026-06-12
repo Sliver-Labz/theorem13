@@ -27,4 +27,54 @@ impl SMRConfig {
             && self.failure_detection_threshold_ms > 0
             && self.intactness_proof_timeout_ms > 0
     }
+
+    pub fn builder() -> ConfigBuilder {
+        ConfigBuilder::default()
+    }
+}
+
+pub struct ConfigBuilder {
+    config: SMRConfig,
+}
+
+impl Default for ConfigBuilder {
+    fn default() -> Self {
+        Self {
+            config: SMRConfig::default(),
+        }
+    }
+}
+
+impl ConfigBuilder {
+    pub fn enabled(mut self, enabled: bool) -> Self {
+        self.config.enabled = enabled;
+        self
+    }
+
+    pub fn max_reconfigs_per_slot(mut self, max: usize) -> Self {
+        self.config.max_reconfigs_per_slot = max;
+        self
+    }
+
+    pub fn failure_detection_threshold_ms(mut self, ms: u64) -> Self {
+        self.config.failure_detection_threshold_ms = ms;
+        self
+    }
+
+    pub fn intactness_proof_timeout_ms(mut self, ms: u64) -> Self {
+        self.config.intactness_proof_timeout_ms = ms;
+        self
+    }
+
+    pub fn checkpoint_ballot_height(mut self, height: u64) -> Self {
+        self.config.checkpoint_ballot_height = height;
+        self
+    }
+
+    pub fn build(self) -> Result<SMRConfig, String> {
+        if !self.config.is_valid() {
+            return Err("Invalid SMR configuration".to_string());
+        }
+        Ok(self.config)
+    }
 }
