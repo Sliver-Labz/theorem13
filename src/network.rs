@@ -89,3 +89,54 @@ impl MessageSerializer {
         serde_json::from_slice(data).map_err(|e| format!("Deserialization failed: {}", e))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_message_queue() {
+        let mut queue = MessageQueue::new(3);
+        let msg = NetworkMessage::new(
+            MessageType::Heartbeat,
+            "A".to_string(),
+            1,
+            vec![],
+            0,
+            0,
+        );
+        assert!(queue.enqueue(msg));
+        assert_eq!(queue.size(), 1);
+    }
+
+    #[test]
+    fn test_message_queue_full() {
+        let mut queue = MessageQueue::new(1);
+        let msg = NetworkMessage::new(
+            MessageType::Heartbeat,
+            "A".to_string(),
+            1,
+            vec![],
+            0,
+            0,
+        );
+        assert!(queue.enqueue(msg.clone()));
+        assert!(!queue.enqueue(msg));
+    }
+
+    #[test]
+    fn test_message_serialization() {
+        let msg = NetworkMessage::new(
+            MessageType::Heartbeat,
+            "A".to_string(),
+            1,
+            vec![1, 2, 3],
+            0,
+            100,
+        );
+        let serialized = MessageSerializer::serialize(&msg).unwrap();
+        let deserialized = MessageSerializer::deserialize(&serialized).unwrap();
+        assert_eq!(deserialized.sender_id, "A");
+        assert_eq!(deserialized.timestamp, 100);
+    }
+}
