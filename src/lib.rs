@@ -10,6 +10,7 @@ pub mod validation;
 pub mod byzantine;
 pub mod metrics;
 pub mod statistics;
+pub mod soroban_integration;
 
 pub use protocol::{SMRState, ReconfigMessage, CheckpointBallot};
 pub use intactness::{IntactnessProof, IntactnessValidator};
@@ -23,3 +24,4 @@ pub use validation::{MessageValidator, SignatureValidator};
 pub use byzantine::ByzantineMessageFilter;
 pub use metrics::{MetricEvent, MetricsCollector};
 pub use statistics::{ConsensusStatistics, StatisticsTracker};
+pub use soroban_integration::{SorobanBridge, SorobanReconfigValidator, ConsensusStateSnapshot};
