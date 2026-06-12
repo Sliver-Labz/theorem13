@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::Path;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SMRConfig {
@@ -76,5 +78,23 @@ impl ConfigBuilder {
             return Err("Invalid SMR configuration".to_string());
         }
         Ok(self.config)
+    }
+}
+
+pub struct ConfigLoader;
+
+impl ConfigLoader {
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<SMRConfig, String> {
+        let content = fs::read_to_string(path).map_err(|e| format!("Failed to read config file: {}", e))?;
+        toml::from_str(&content).map_err(|e| format!("Failed to parse TOML: {}", e))
+    }
+
+    pub fn from_str(content: &str) -> Result<SMRConfig, String> {
+        toml::from_str(content).map_err(|e| format!("Failed to parse TOML: {}", e))
+    }
+
+    pub fn to_file<P: AsRef<Path>>(config: &SMRConfig, path: P) -> Result<(), String> {
+        let content = toml::to_string_pretty(config).map_err(|e| format!("Failed to serialize config: {}", e))?;
+        fs::write(path, content).map_err(|e| format!("Failed to write config file: {}", e))
     }
 }
