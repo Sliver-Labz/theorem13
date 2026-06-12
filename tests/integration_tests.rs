@@ -1,12 +1,33 @@
-mod test_utils;
-
 use smr_protocol::*;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+
+fn create_test_quorum_slices(node_ids: Vec<&str>) -> HashMap<String, QuorumSlice> {
+    let mut slices = HashMap::new();
+    let validators: HashSet<String> = node_ids.iter().map(|id| id.to_string()).collect();
+    let threshold = (node_ids.len() / 2) + 1;
+    for node_id in node_ids {
+        slices.insert(
+            node_id.to_string(),
+            QuorumSlice::new(threshold, validators.clone()),
+        );
+    }
+    slices
+}
+
+fn create_test_config() -> SMRConfig {
+    SMRConfig {
+        enabled: true,
+        max_reconfigs_per_slot: 3,
+        failure_detection_threshold_ms: 5000,
+        intactness_proof_timeout_ms: 2000,
+        checkpoint_ballot_height: 0,
+    }
+}
 
 #[test]
 fn test_e2e_normal_consensus() {
-    let slices = test_utils::create_test_quorum_slices(vec!["A", "B", "C"]);
-    let config = test_utils::create_config();
+    let slices = create_test_quorum_slices(vec!["A", "B", "C"]);
+    let config = create_test_config();
 
     assert!(config.is_valid());
     assert_eq!(slices.len(), 3);
