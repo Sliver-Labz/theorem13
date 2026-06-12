@@ -61,3 +61,32 @@ impl StatisticsTracker {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_statistics_tracker_creation() {
+        let tracker = StatisticsTracker::new(100);
+        let stats = tracker.get_statistics();
+        assert_eq!(stats.total_slots, 0);
+    }
+
+    #[test]
+    fn test_record_slot_start() {
+        let mut tracker = StatisticsTracker::new(100);
+        tracker.record_slot_start(100);
+        let stats = tracker.get_statistics();
+        assert_eq!(stats.total_slots, 1);
+    }
+
+    #[test]
+    fn test_record_reconfig() {
+        let mut tracker = StatisticsTracker::new(100);
+        tracker.record_reconfig_proposed(100, 50.0);
+        tracker.record_reconfig_committed(150, 75.0);
+        let stats = tracker.get_statistics();
+        assert_eq!(stats.successful_reconfigs, 1);
+    }
+}
