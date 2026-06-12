@@ -70,3 +70,43 @@ impl P2PNode {
         self.peers.values().filter(|p| p.is_connected).count()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::network::MessageType;
+
+    #[test]
+    fn test_p2p_node_creation() {
+        let node = P2PNode::new("A".to_string());
+        assert_eq!(node.node_id, "A");
+        assert_eq!(node.peer_count(), 0);
+    }
+
+    #[test]
+    fn test_add_remove_peer() {
+        let mut node = P2PNode::new("A".to_string());
+        node.add_peer("B".to_string());
+        assert_eq!(node.peer_count(), 1);
+        assert!(node.remove_peer("B"));
+        assert_eq!(node.peer_count(), 0);
+    }
+
+    #[test]
+    fn test_broadcast() {
+        let mut node = P2PNode::new("A".to_string());
+        node.add_peer("B".to_string());
+        node.add_peer("C".to_string());
+
+        let msg = NetworkMessage::new(
+            MessageType::Heartbeat,
+            "A".to_string(),
+            1,
+            vec![],
+            0,
+            0,
+        );
+        let broadcasts = node.broadcast(msg);
+        assert_eq!(broadcasts.len(), 2);
+    }
+}
