@@ -71,3 +71,43 @@ impl MetricsCollector {
         Some(sum / values.len() as f64)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_metric_event_creation() {
+        let event = MetricEvent::new("latency".to_string(), 100, 45.5);
+        assert_eq!(event.event_type, "latency");
+        assert_eq!(event.value, 45.5);
+    }
+
+    #[test]
+    fn test_metrics_collector_recording() {
+        let mut collector = MetricsCollector::new(10);
+        let event = MetricEvent::new("latency".to_string(), 100, 50.0);
+        collector.record(event);
+        assert_eq!(collector.get_events().len(), 1);
+    }
+
+    #[test]
+    fn test_metrics_collector_count() {
+        let mut collector = MetricsCollector::new(10);
+        collector.record(MetricEvent::new("latency".to_string(), 100, 50.0));
+        collector.record(MetricEvent::new("latency".to_string(), 101, 55.0));
+        collector.record(MetricEvent::new("throughput".to_string(), 102, 100.0));
+        
+        assert_eq!(collector.count_events("latency"), 2);
+        assert_eq!(collector.count_events("throughput"), 1);
+    }
+
+    #[test]
+    fn test_metrics_collector_average() {
+        let mut collector = MetricsCollector::new(10);
+        collector.record(MetricEvent::new("latency".to_string(), 100, 40.0));
+        collector.record(MetricEvent::new("latency".to_string(), 101, 60.0));
+        
+        assert_eq!(collector.average_value("latency"), Some(50.0));
+    }
+}
