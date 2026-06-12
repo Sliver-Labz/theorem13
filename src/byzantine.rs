@@ -60,3 +60,59 @@ impl ByzantineMessageFilter {
         self.validator.revoke_trusted_key(sender_id)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::network::MessageType;
+
+    #[test]
+    fn test_byzantine_filter_valid_message() {
+        let mut filter = ByzantineMessageFilter::new(
+            vec!["A".to_string()],
+            10,
+        );
+        let msg = NetworkMessage::new(
+            MessageType::Heartbeat,
+            "A".to_string(),
+            1,
+            vec![1, 2, 3],
+            0,
+            100,
+        );
+        assert!(filter.validate_message(&msg, 100, 5000));
+    }
+
+    #[test]
+    fn test_byzantine_filter_untrusted_sender() {
+        let filter = ByzantineMessageFilter::new(vec!["A".to_string()], 10);
+        let msg = NetworkMessage::new(
+            MessageType::Heartbeat,
+            "B".to_string(),
+            1,
+            vec![],
+            0,
+            100,
+        );
+        let mut filter = filter;
+        assert!(!filter.validate_message(&msg, 100, 5000));
+    }
+
+    #[test]
+    fn test_byzantine_filter_duplicate_detection() {
+        let mut filter = ByzantineMessageFilter::new(
+            vec!["A".to_string()],
+            10,
+        );
+        let msg = NetworkMessage::new(
+            MessageType::Heartbeat,
+            "A".to_string(),
+            1,
+            vec![1, 2, 3],
+            0,
+            100,
+        );
+        assert!(filter.validate_message(&msg, 100, 5000));
+        assert!(!filter.validate_message(&msg, 100, 5000));
+    }
+}
