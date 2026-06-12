@@ -77,3 +77,15 @@ impl MessageQueue {
         self.messages.is_empty()
     }
 }
+
+pub struct MessageSerializer;
+
+impl MessageSerializer {
+    pub fn serialize(msg: &NetworkMessage) -> Result<Vec<u8>, String> {
+        serde_json::to_vec(msg).map_err(|e| format!("Serialization failed: {}", e))
+    }
+
+    pub fn deserialize(data: &[u8]) -> Result<NetworkMessage, String> {
+        serde_json::from_slice(data).map_err(|e| format!("Deserialization failed: {}", e))
+    }
+}
