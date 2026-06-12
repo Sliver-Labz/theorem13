@@ -98,3 +98,43 @@ impl ConfigLoader {
         fs::write(path, content).map_err(|e| format!("Failed to write config file: {}", e))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_builder() {
+        let config = ConfigBuilder::default()
+            .enabled(true)
+            .max_reconfigs_per_slot(5)
+            .build()
+            .unwrap();
+
+        assert!(config.enabled);
+        assert_eq!(config.max_reconfigs_per_slot, 5);
+    }
+
+    #[test]
+    fn test_config_invalid() {
+        let result = ConfigBuilder::default()
+            .max_reconfigs_per_slot(0)
+            .build();
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_config_from_str() {
+        let toml_str = r#"
+enabled = true
+max_reconfigs_per_slot = 4
+failure_detection_threshold_ms = 6000
+intactness_proof_timeout_ms = 3000
+checkpoint_ballot_height = 100
+"#;
+        let config = ConfigLoader::from_str(toml_str).unwrap();
+        assert_eq!(config.max_reconfigs_per_slot, 4);
+        assert_eq!(config.checkpoint_ballot_height, 100);
+    }
+}
