@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use crate::protocol::ReconfigMessage;
+use std::collections::VecDeque;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum MessageType {
@@ -40,5 +41,39 @@ impl NetworkMessage {
 
     pub fn is_reconfig(&self) -> bool {
         matches!(self.msg_type, MessageType::ReconfigProposal | MessageType::ReconfigVote)
+    }
+}
+
+pub struct MessageQueue {
+    messages: VecDeque<NetworkMessage>,
+    max_size: usize,
+}
+
+impl MessageQueue {
+    pub fn new(max_size: usize) -> Self {
+        Self {
+            messages: VecDeque::new(),
+            max_size,
+        }
+    }
+
+    pub fn enqueue(&mut self, msg: NetworkMessage) -> bool {
+        if self.messages.len() >= self.max_size {
+            return false;
+        }
+        self.messages.push_back(msg);
+        true
+    }
+
+    pub fn dequeue(&mut self) -> Option<NetworkMessage> {
+        self.messages.pop_front()
+    }
+
+    pub fn size(&self) -> usize {
+        self.messages.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.messages.is_empty()
     }
 }
